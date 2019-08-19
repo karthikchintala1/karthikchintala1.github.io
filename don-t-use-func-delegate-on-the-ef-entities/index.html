@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+<title>Don&#39;t use Func delegate on the Entity Framework entities - Code Rethinked</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="msvalidate.01" content="EAD023F7057074B942978E2AC910527E">
+
+
+
+    <meta name="description" content="Why LINQ query is slow. Func delegate on Entity framework causes performance issue. In this post, I&apos;ll talk about how the func delegate causes performance implications on Entity framework entities.">
+<meta name="keywords" content="csharp,linq,func,performance">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Don&#39;t use Func delegate on the Entity Framework entities">
+<meta property="og:url" content="https://coderethinked.com/don-t-use-func-delegate-on-the-ef-entities/index.html">
+<meta property="og:site_name" content="Code Rethinked">
+<meta property="og:description" content="Why LINQ query is slow. Func delegate on Entity framework causes performance issue. In this post, I&apos;ll talk about how the func delegate causes performance implications on Entity framework entities.">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-08-17T02:24:04.556Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Don&#39;t use Func delegate on the Entity Framework entities">
+<meta name="twitter:description" content="Why LINQ query is slow. Func delegate on Entity framework causes performance issue. In this post, I&apos;ll talk about how the func delegate causes performance implications on Entity framework entities.">
+<meta name="twitter:creator" content="@nani938">
+
+
+
+
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-1873760810392013",
+    enable_page_level_ads: true
+    });
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-121883857-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-121883857-1');
+</script>
+
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+    
+    
+
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                Coderethinked.com
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item" href="/">Home</a>
+                
+                <a class="navbar-item" href="/archives">Archives</a>
+                
+                <a class="navbar-item" href="/categories">Categories</a>
+                
+                <a class="navbar-item" href="/tags">Tags</a>
+                
+                <a class="navbar-item" href="/about">About</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="http://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="Catalogue" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="Search" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-image">
+        <span class="image is-7by1">
+            <img class="thumbnail" src="/gallery/slow.jpg" alt="Don&#39;t use Func delegate on the Entity Framework entities">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2018-11-03T02:24:59.000Z">2018-11-03</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/csharp/">csharp</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/csharp/performance/">performance</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    6 minutes read (About 923 words)
+                </span>
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                Don&#39;t use Func delegate on the Entity Framework entities
+            
+        </h1>
+        <div class="content">
+            <p>In this post, I’ll show you what happens when you use a func delegate on the Entity Framework entities.<br><a id="more"></a><br>I have seen a case where a developer wrote a LINQ query with Func delegate which will get the data from the database and returns back to the UI.</p>
+<p>The query was working fine but it needs performance tuning as it is taking more time for a simple query.</p>
+<h3 id="Example-LINQ-Query"><a href="#Example-LINQ-Query" class="headerlink" title="Example: LINQ Query"></a>Example: LINQ Query</h3><p>This is the LINQ query that we are interested in.</p>
+<figure class="highlight csharp hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Main</span>(<span class="hljs-params"><span class="hljs-keyword">string</span>[] args</span>)</span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">    Func&lt;Employee, <span class="hljs-keyword">bool</span>&gt; dynamicFilter = GetDynamicQuery();</span><br><span class="line">    <span class="hljs-keyword">var</span> results = EmployeeContext.Employee.Where(dynamicFilter).Count();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Func&lt;Employee, <span class="hljs-keyword">bool</span>&gt; <span class="hljs-title">GetDynamicQuery</span>(<span class="hljs-params"></span>)</span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">    Func&lt;Employee, <span class="hljs-keyword">bool</span>&gt; e;</span><br><span class="line">    <span class="hljs-comment">//the lambda expressions set to the result "e" are dynamically obtained.</span></span><br><span class="line">    <span class="hljs-comment">//For the purpose here, let's assume we are getting the following</span></span><br><span class="line">    <span class="hljs-comment">//lambda expression</span></span><br><span class="line">    e = p =&gt; p.JobTitle == <span class="hljs-string">"Design Engineer"</span>;</span><br><span class="line">    <span class="hljs-keyword">return</span> e;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>The above code will execute and will return the employees whose have the designation as “Design Engineer” (it is actually dynamic based on few other conditions).<br>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1873760810392013" data-ad-slot="4571563695"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<br><em><a href="http://coderethinked.com/building-dynamic-linq-queries-using-expression-trees-and-func">Check out this article if you are interested in writing dynamic queries with Expression Trees</a></em></p>
+<p>If you don’t know what will happen under the hood then you will fail to refactor this and will certainly write a stored procedure to improve the performance.</p>
+<h3 id="Background-on-LINQ-query-execution"><a href="#Background-on-LINQ-query-execution" class="headerlink" title="Background on LINQ query execution"></a>Background on LINQ query execution</h3><p>When a LINQ query is executed, it finds the Expressions in the query and will translate into appropriate SQL queries and will be submitted to the server. This gives us the result.</p>
+<h3 id="Ok-why-it-took-more-time"><a href="#Ok-why-it-took-more-time" class="headerlink" title="Ok, why it took more time"></a>Ok, why it took more time</h3><p>Now, let’s understand why it took more time to return the result.</p>
+<p>The <code>.Where</code> extension method has two overloads. One that implements <code>IQueryable</code>, which takes <code>Expression</code> parameter and the other that implements <code>IEnumerable</code>, which takes a <code>Func</code>.</p>
+<ul>
+<li>The <a href="https://docs.microsoft.com/en-us/dotnet/api/system.linq.queryable.where?view=netframework-4.7.2#System_Linq_Queryable_Where__1_System_Linq_IQueryable___0__System_Linq_Expressions_Expression_System_Func___0_System_Int32_System_Boolean___" target="_blank" rel="noopener">IQueryable overload</a> of Where</li>
+</ul>
+<figure class="highlight csharp hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> IQueryable&lt;TSource&gt; Where&lt;TSource&gt; (<span class="hljs-keyword">this</span> IQueryable&lt;TSource&gt; source, Expression&lt;Func&lt;TSource,<span class="hljs-keyword">int</span>,<span class="hljs-keyword">bool</span>&gt;&gt; predicate);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>The <a href="https://docs.microsoft.com/en-us/dotnet/api/system.linq.enumerable.where?view=netframework-4.7.2#System_Linq_Enumerable_Where__1_System_Collections_Generic_IEnumerable___0__System_Func___0_System_Int32_System_Boolean__" target="_blank" rel="noopener">IEnumerable overload</a> of Where</li>
+</ul>
+<figure class="highlight csharp hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> IEnumerable&lt;TSource&gt; Where&lt;TSource&gt; (<span class="hljs-keyword">this</span> IEnumerable&lt;TSource&gt; source, Func&lt;TSource,<span class="hljs-keyword">int</span>,<span class="hljs-keyword">bool</span>&gt; predicate);</span><br></pre></td></tr></table></figure>
+<p>Now, in our case, the predicate here is a <code>Func</code>. So, the second version of the <code>.Where</code> that implements <code>IEnumerable</code> will be used.</p>
+<p>One important thing to note here is that Entity Framework will consider only IQueryable’s to translate into SQL. So, if we use the IEnumerable extension for the entities that will not be translated.</p>
+<p>With that in mind, let’s examine our Query on the Employee entity.</p>
+<figure class="highlight csharp hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Func&lt;Employee, <span class="hljs-keyword">bool</span>&gt; dynamicFilter = p =&gt; p.JobTitle == <span class="hljs-string">"Design Engineer"</span>;</span><br><span class="line"><span class="hljs-keyword">var</span> results = EmployeeContext.Employee.Where(dynamicFilter);</span><br></pre></td></tr></table></figure>
+
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1873760810392013" data-ad-slot="4571563695"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<p>If you can check the output of the operation you can see that we are getting correct results.</p>
+<p>But, the fact is that our <em>Func delegate is not translated into SQL</em>. So, only the <code>EmployeeContext.Employee</code> is translated into appropriate SQL query and will be sent to SQL server.</p>
+<p>That will fetch all the records of the employee table and load into memory and will perform an IEnumerable where filter on the whole collection to find the appropriate employee whose designation is “Design Engineer”.</p>
+<p>If the <code>Employee</code> table is huge then the query will take more time to fetch the records.</p>
+<p>Let’s see this in action with <a href="https://www.linqpad.net/" target="_blank" rel="noopener">LINQPad</a>.</p>
+<p>For the purpose of this article, I’ve restored <code>AdventureWorks2014</code> database on my machine.</p>
+<figure class="highlight csharp hljs"><figcaption><span>with func delegate</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Func&lt;Employee, <span class="hljs-keyword">bool</span>&gt; funcPred  = p =&gt; p.JobTitle == <span class="hljs-string">"Design Engineer"</span>;</span><br><span class="line"><span class="hljs-keyword">var</span> total = Employees.Where(funcPred).Count();</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql hljs"><figcaption><span>SQL query generated for Func in LINQPad</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">SELECT</span> [t0].[BusinessEntityID], [t0].[NationalIDNumber], [t0].[LoginID], [t0].[OrganizationNode], [t0].[OrganizationLevel], [t0].[JobTitle], [t0].[BirthDate], [t0].[MaritalStatus], [t0].[Gender], [t0].[HireDate], [t0].[SalariedFlag], [t0].[VacationHours], [t0].[SickLeaveHours], [t0].[CurrentFlag], [t0].[rowguid] <span class="hljs-keyword">AS</span> [Rowguid], [t0].[ModifiedDate]</span><br><span class="line"><span class="hljs-keyword">FROM</span> [HumanResources].[Employee] <span class="hljs-keyword">AS</span> [t0]</span><br></pre></td></tr></table></figure>
+<p>Look at the SQL generated for the above code, it just pulled everything from the Employee table. And, once we get the entire table to in-memory, LINQ will perform the filter on the entire list of employees and returns the result.</p>
+<p>The solution to this problem is to wrap the Func with Expression.</p>
+<h3 id="Solution-Go-for-Expression-lt-Func-gt"><a href="#Solution-Go-for-Expression-lt-Func-gt" class="headerlink" title="Solution: Go for Expression&lt;Func&gt;"></a>Solution: Go for Expression&lt;Func<t>&gt;</t></h3><p>Let’s wrap Expression around Func and see the results.</p>
+<figure class="highlight csharp hljs"><figcaption><span>With expression wrapped around func</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Expression&lt;Func&lt;Employee, <span class="hljs-keyword">bool</span>&gt;&gt; funcPred  = p =&gt; p.JobTitle == <span class="hljs-string">"Design Engineer"</span>;</span><br><span class="line"><span class="hljs-keyword">var</span> total = Employees.Where(funcPred).Count();</span><br></pre></td></tr></table></figure>
+<p>The sql generated for the above code is<br><figure class="highlight sql hljs"><figcaption><span>SQL query generated for Expression in LINQPad</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">DECLARE</span> @p0 <span class="hljs-keyword">NVarChar</span>(<span class="hljs-number">1000</span>) = <span class="hljs-string">'Design Engineer'</span></span><br><span class="line"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">COUNT</span>(*) <span class="hljs-keyword">AS</span> [<span class="hljs-keyword">value</span>]</span><br><span class="line"><span class="hljs-keyword">FROM</span> [HumanResources].[Employee] <span class="hljs-keyword">AS</span> [t0]</span><br><span class="line"><span class="hljs-keyword">WHERE</span> [t0].[JobTitle] = @p0</span><br></pre></td></tr></table></figure><br>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1873760810392013" data-ad-slot="4571563695"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<br>As you can see we have got the exact SQL query for the LINQ query we wrote. The above query doesn’t take much time as the query directly returns the result instead of returning everything in the tables.</p>
+<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>If we mix these Func delegates in C# with the Entity framework entities then this would happen.</p>
+<p>If you don’t understand the inner workings of the LINQ to SQL translation, you will end up querying the entire table in LINQ. More importantly, you will get the result but the query is slow.</p>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/csharp/">csharp</a>, <a class="has-link-grey -link" href="/tags/func/">func</a>, <a class="has-link-grey -link" href="/tags/linq/">linq</a>, <a class="has-link-grey -link" href="/tags/performance/">performance</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        
+<div class="addthis_inline_share_toolbox"></div>
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5cb8035154152752"></script>
+
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/unit-tests-for-private-methods/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Unit tests for private methods?</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/building-dynamic-linq-queries-using-expression-trees-and-func/">
+                <span class="level-item">Building dynamic LINQ queries using Expression Trees and Func</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">Comments</h3>
+        
+<script>
+    var disqus_config = function () {
+        this.page.url = 'https://coderethinked.com/don-t-use-func-delegate-on-the-ef-entities/';
+        this.page.identifier = 'don-t-use-func-delegate-on-the-ef-entities/';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');  
+        s.src = '//' + 'www-coderethinked-com' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+
+<div id="disqus_thread">
+    
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    <img class="image is-128x128 has-mb-6" src="/images/crlogo.png" alt="Code Rethinked">
+                    
+                    <p class="is-size-4 is-block">
+                        Code Rethinked
+                    </p>
+                    
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>Hyderabad, IN</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Posts
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        26
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Categories
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        20
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        Tags
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        55
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="http://eepurl.com/dKduOE">
+                Subscribe</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Github" href="https://github.com/karthikchintala1">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Twitter" href="http://twitter.com/nani938">
+                
+                <i class="fab fa-twitter"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="Subscribe" href="http://eepurl.com/dKduOE">
+                
+                <i class="fa fa-angle-double-down"></i>
+                
+            </a>
+            
+            <a class="level-item button is-white is-marginless" target="_blank" title="RSS" href="/feed.xml">
+                
+                <i class="fas fa-rss"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+<div class="card widget" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Catalogue
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#Example-LINQ-Query">
+        <span class="has-mr-6">1</span>
+        <span>Example: LINQ Query</span>
+        </a></li><li>
+        <a class="is-flex" href="#Background-on-LINQ-query-execution">
+        <span class="has-mr-6">2</span>
+        <span>Background on LINQ query execution</span>
+        </a></li><li>
+        <a class="is-flex" href="#Ok-why-it-took-more-time">
+        <span class="has-mr-6">3</span>
+        <span>Ok, why it took more time</span>
+        </a></li><li>
+        <a class="is-flex" href="#Solution-Go-for-Expression-lt-Func-gt">
+        <span class="has-mr-6">4</span>
+        <span>Solution: Go for Expression&lt;Func&gt;</span>
+        </a></li><li>
+        <a class="is-flex" href="#Conclusion">
+        <span class="has-mr-6">5</span>
+        <span>Conclusion</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Categories
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/asp-net-core/">
+            <span class="level-start">
+                <span class="level-item">ASP.NET Core</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">6</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/blazor/">
+            <span class="level-start">
+                <span class="level-item">Blazor</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/blazor/asp-net-core/">
+            <span class="level-start">
+                <span class="level-item">ASP.NET Core</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/entity-framework/">
+            <span class="level-start">
+                <span class="level-item">Entity Framework</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/visual-studio/">
+            <span class="level-start">
+                <span class="level-item">Visual Studio</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/asp-net-core/">
+            <span class="level-start">
+                <span class="level-item">asp-net-core</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/blazor/">
+            <span class="level-start">
+                <span class="level-item">blazor</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/blazor/net-core/">
+            <span class="level-start">
+                <span class="level-item">.NET Core</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/csharp/">
+            <span class="level-start">
+                <span class="level-item">csharp</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">11</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/csharp/delegates/">
+            <span class="level-start">
+                <span class="level-item">delegates</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/csharp/design-patterns/">
+            <span class="level-start">
+                <span class="level-item">design patterns</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/csharp/expression-trees/">
+            <span class="level-start">
+                <span class="level-item">expression trees</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/csharp/linq/">
+            <span class="level-start">
+                <span class="level-item">linq</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/csharp/performance/">
+            <span class="level-start">
+                <span class="level-item">performance</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/csharp/refactoring/">
+            <span class="level-start">
+                <span class="level-item">refactoring</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/javascript/">
+            <span class="level-start">
+                <span class="level-item">javascript</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/javascript/jquery/">
+            <span class="level-start">
+                <span class="level-item">jQuery</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/tools/">
+            <span class="level-start">
+                <span class="level-item">tools</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/unit-testing/">
+            <span class="level-start">
+                <span class="level-item">unit testing</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Tag Cloud
+        </h3>
+        <a href="/tags/autodetectchangesenabled/" style="font-size: 10px;">AutoDetectChangesEnabled</a> <a href="/tags/il/" style="font-size: 10px;">IL</a> <a href="/tags/libman/" style="font-size: 10px;">LibMan</a> <a href="/tags/microsoft/" style="font-size: 10px;">Microsoft</a> <a href="/tags/visual-studio/" style="font-size: 10px;">Visual Studio</a> <a href="/tags/action/" style="font-size: 10px;">action</a> <a href="/tags/asp-net-core/" style="font-size: 17.5px;">asp-net-core</a> <a href="/tags/async-await/" style="font-size: 10px;">async-await</a> <a href="/tags/awaitables/" style="font-size: 10px;">awaitables</a> <a href="/tags/benefits/" style="font-size: 10px;">benefits</a> <a href="/tags/blazor/" style="font-size: 12.5px;">blazor</a> <a href="/tags/boxing/" style="font-size: 10px;">boxing</a> <a href="/tags/callback-functions/" style="font-size: 10px;">callback functions</a> <a href="/tags/compiler/" style="font-size: 10px;">compiler</a> <a href="/tags/component-parameters/" style="font-size: 10px;">component parameters</a> <a href="/tags/csharp/" style="font-size: 20px;">csharp</a> <a href="/tags/custom/" style="font-size: 10px;">custom</a> <a href="/tags/customizing-400-error-response/" style="font-size: 10px;">customizing 400 error response</a> <a href="/tags/dapper/" style="font-size: 10px;">dapper</a> <a href="/tags/data-binding/" style="font-size: 10px;">data binding</a> <a href="/tags/debugging/" style="font-size: 10px;">debugging</a> <a href="/tags/dictionary/" style="font-size: 10px;">dictionary</a> <a href="/tags/entity-framework/" style="font-size: 10px;">entity framework</a> <a href="/tags/event-bubbling/" style="font-size: 10px;">event bubbling</a> <a href="/tags/event-delegation/" style="font-size: 10px;">event delegation</a> <a href="/tags/expression-trees/" style="font-size: 12.5px;">expression trees</a> <a href="/tags/extension-method/" style="font-size: 10px;">extension method</a> <a href="/tags/filter/" style="font-size: 10px;">filter</a> <a href="/tags/func/" style="font-size: 15px;">func</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/libman-json/" style="font-size: 10px;">libman.json</a> <a href="/tags/linq/" style="font-size: 17.5px;">linq</a> <a href="/tags/list/" style="font-size: 10px;">list</a> <a href="/tags/model-state-validation/" style="font-size: 10px;">model state validation</a> <a href="/tags/oftype/" style="font-size: 10px;">oftype</a> <a href="/tags/one-way-data-binding/" style="font-size: 10px;">one-way data binding</a> <a href="/tags/performance/" style="font-size: 10px;">performance</a> <a href="/tags/preventdefault/" style="font-size: 10px;">preventDefault</a> <a href="/tags/private-methods/" style="font-size: 10px;">private methods</a> <a href="/tags/refactoring/" style="font-size: 10px;">refactoring</a> <a href="/tags/row-number/" style="font-size: 10px;">row_number</a> <a href="/tags/sharplab/" style="font-size: 10px;">sharplab</a> <a href="/tags/signalr/" style="font-size: 10px;">signalr</a> <a href="/tags/stack/" style="font-size: 10px;">stack</a> <a href="/tags/stoppropagation/" style="font-size: 10px;">stopPropagation</a> <a href="/tags/strategy-design-pattern/" style="font-size: 10px;">strategy design pattern</a> <a href="/tags/streaming/" style="font-size: 10px;">streaming</a> <a href="/tags/switch-case/" style="font-size: 12.5px;">switch case</a> <a href="/tags/taghelpers/" style="font-size: 12.5px;">taghelpers</a> <a href="/tags/task/" style="font-size: 10px;">task</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a> <a href="/tags/two-way-data-binding/" style="font-size: 10px;">two-way data binding</a> <a href="/tags/unit-testing/" style="font-size: 10px;">unit testing</a> <a href="/tags/web-api/" style="font-size: 10px;">web api</a>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen is-sticky">
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Recent
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/tosafedictionary-extension-method-in-csharp/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/tosafedictionary.png" alt=".ToSafeDictionary() extension method in csharp">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-19T03:14:58.000Z">2019-08-19</time></div>
+                    <a href="/tosafedictionary-extension-method-in-csharp/" class="has-link-black-ter is-size-6">.ToSafeDictionary() extension method in csharp</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/csharp/">csharp</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/delegates-as-callback-functions-in-csharp/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/callback-functions-in-csharp.png" alt="Delegates as callback functions in csharp">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-06-20T05:51:21.000Z">2019-06-20</time></div>
+                    <a href="/delegates-as-callback-functions-in-csharp/" class="has-link-black-ter is-size-6">Delegates as callback functions in csharp</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/csharp/">csharp</a> / <a class="has-link-grey -link" href="/categories/csharp/delegates/">delegates</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/data-binding-in-blazor/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/data-binding-in-blazor.jpg" alt="Data binding in blazor">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-05-13T04:35:25.000Z">2019-05-13</time></div>
+                    <a href="/data-binding-in-blazor/" class="has-link-black-ter is-size-6">Data binding in blazor</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/blazor/">blazor</a> / <a class="has-link-grey -link" href="/categories/blazor/net-core/">.NET Core</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/unable-to-find-debuggable-browser-tab-in-blazor/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/debugging_blazor.jpg" alt="Unable to find debuggable browser tab in Blazor">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-30T01:41:44.000Z">2019-04-30</time></div>
+                    <a href="/unable-to-find-debuggable-browser-tab-in-blazor/" class="has-link-black-ter is-size-6">Unable to find debuggable browser tab in Blazor</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/blazor/">Blazor</a> / <a class="has-link-grey -link" href="/categories/blazor/asp-net-core/">ASP.NET Core</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/the-strategy-design-pattern-with-an-example/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/strategy_design.jpg" alt="The strategy design pattern with an example">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-18T01:17:52.000Z">2019-04-18</time></div>
+                    <a href="/the-strategy-design-pattern-with-an-example/" class="has-link-black-ter is-size-6">The strategy design pattern with an example</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/csharp/">csharp</a> / <a class="has-link-grey -link" href="/categories/csharp/design-patterns/">design patterns</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Archives
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/06/">
+                <span class="level-start">
+                    <span class="level-item">June 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">May 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">April 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/03/">
+                <span class="level-start">
+                    <span class="level-item">March 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">3</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/02/">
+                <span class="level-start">
+                    <span class="level-item">February 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/01/">
+                <span class="level-start">
+                    <span class="level-item">January 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/12/">
+                <span class="level-start">
+                    <span class="level-item">December 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">November 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/10/">
+                <span class="level-start">
+                    <span class="level-item">October 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/09/">
+                <span class="level-start">
+                    <span class="level-item">September 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">3</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/07/">
+                <span class="level-start">
+                    <span class="level-item">July 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">3</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Tags
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/autodetectchangesenabled/">
+                        <span class="tag">AutoDetectChangesEnabled</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/il/">
+                        <span class="tag">IL</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/libman/">
+                        <span class="tag">LibMan</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/microsoft/">
+                        <span class="tag">Microsoft</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/visual-studio/">
+                        <span class="tag">Visual Studio</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/action/">
+                        <span class="tag">action</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/asp-net-core/">
+                        <span class="tag">asp-net-core</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/async-await/">
+                        <span class="tag">async-await</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/awaitables/">
+                        <span class="tag">awaitables</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/benefits/">
+                        <span class="tag">benefits</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/blazor/">
+                        <span class="tag">blazor</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/boxing/">
+                        <span class="tag">boxing</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/callback-functions/">
+                        <span class="tag">callback functions</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/compiler/">
+                        <span class="tag">compiler</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/component-parameters/">
+                        <span class="tag">component parameters</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/csharp/">
+                        <span class="tag">csharp</span>
+                        <span class="tag is-grey">11</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/custom/">
+                        <span class="tag">custom</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/customizing-400-error-response/">
+                        <span class="tag">customizing 400 error response</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/dapper/">
+                        <span class="tag">dapper</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/data-binding/">
+                        <span class="tag">data binding</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/debugging/">
+                        <span class="tag">debugging</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/dictionary/">
+                        <span class="tag">dictionary</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/entity-framework/">
+                        <span class="tag">entity framework</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/event-bubbling/">
+                        <span class="tag">event bubbling</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/event-delegation/">
+                        <span class="tag">event delegation</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/expression-trees/">
+                        <span class="tag">expression trees</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/extension-method/">
+                        <span class="tag">extension method</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/filter/">
+                        <span class="tag">filter</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/func/">
+                        <span class="tag">func</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/heap/">
+                        <span class="tag">heap</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/javascript/">
+                        <span class="tag">javascript</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/libman-json/">
+                        <span class="tag">libman.json</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/linq/">
+                        <span class="tag">linq</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/list/">
+                        <span class="tag">list</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/model-state-validation/">
+                        <span class="tag">model state validation</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/oftype/">
+                        <span class="tag">oftype</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/one-way-data-binding/">
+                        <span class="tag">one-way data binding</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/performance/">
+                        <span class="tag">performance</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/preventdefault/">
+                        <span class="tag">preventDefault</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/private-methods/">
+                        <span class="tag">private methods</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/refactoring/">
+                        <span class="tag">refactoring</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/row-number/">
+                        <span class="tag">row_number</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/sharplab/">
+                        <span class="tag">sharplab</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/signalr/">
+                        <span class="tag">signalr</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/stack/">
+                        <span class="tag">stack</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/stoppropagation/">
+                        <span class="tag">stopPropagation</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/strategy-design-pattern/">
+                        <span class="tag">strategy design pattern</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/streaming/">
+                        <span class="tag">streaming</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/switch-case/">
+                        <span class="tag">switch case</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/taghelpers/">
+                        <span class="tag">taghelpers</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/task/">
+                        <span class="tag">task</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/tools/">
+                        <span class="tag">tools</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/two-way-data-binding/">
+                        <span class="tag">two-way data binding</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/unit-testing/">
+                        <span class="tag">unit testing</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/web-api/">
+                        <span class="tag">web api</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right is-sticky">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            Recent
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/tosafedictionary-extension-method-in-csharp/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/tosafedictionary.png" alt=".ToSafeDictionary() extension method in csharp">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-19T03:14:58.000Z">2019-08-19</time></div>
+                    <a href="/tosafedictionary-extension-method-in-csharp/" class="has-link-black-ter is-size-6">.ToSafeDictionary() extension method in csharp</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/csharp/">csharp</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/delegates-as-callback-functions-in-csharp/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/callback-functions-in-csharp.png" alt="Delegates as callback functions in csharp">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-06-20T05:51:21.000Z">2019-06-20</time></div>
+                    <a href="/delegates-as-callback-functions-in-csharp/" class="has-link-black-ter is-size-6">Delegates as callback functions in csharp</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/csharp/">csharp</a> / <a class="has-link-grey -link" href="/categories/csharp/delegates/">delegates</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/data-binding-in-blazor/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/data-binding-in-blazor.jpg" alt="Data binding in blazor">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-05-13T04:35:25.000Z">2019-05-13</time></div>
+                    <a href="/data-binding-in-blazor/" class="has-link-black-ter is-size-6">Data binding in blazor</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/blazor/">blazor</a> / <a class="has-link-grey -link" href="/categories/blazor/net-core/">.NET Core</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/unable-to-find-debuggable-browser-tab-in-blazor/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/debugging_blazor.jpg" alt="Unable to find debuggable browser tab in Blazor">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-30T01:41:44.000Z">2019-04-30</time></div>
+                    <a href="/unable-to-find-debuggable-browser-tab-in-blazor/" class="has-link-black-ter is-size-6">Unable to find debuggable browser tab in Blazor</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/blazor/">Blazor</a> / <a class="has-link-grey -link" href="/categories/blazor/asp-net-core/">ASP.NET Core</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/the-strategy-design-pattern-with-an-example/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/gallery/strategy_design.jpg" alt="The strategy design pattern with an example">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-04-18T01:17:52.000Z">2019-04-18</time></div>
+                    <a href="/the-strategy-design-pattern-with-an-example/" class="has-link-black-ter is-size-6">The strategy design pattern with an example</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/csharp/">csharp</a> / <a class="has-link-grey -link" href="/categories/csharp/design-patterns/">design patterns</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            Archives
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/06/">
+                <span class="level-start">
+                    <span class="level-item">June 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/05/">
+                <span class="level-start">
+                    <span class="level-item">May 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/04/">
+                <span class="level-start">
+                    <span class="level-item">April 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/03/">
+                <span class="level-start">
+                    <span class="level-item">March 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">3</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/02/">
+                <span class="level-start">
+                    <span class="level-item">February 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/01/">
+                <span class="level-start">
+                    <span class="level-item">January 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/12/">
+                <span class="level-start">
+                    <span class="level-item">December 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">November 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/10/">
+                <span class="level-start">
+                    <span class="level-item">October 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/09/">
+                <span class="level-start">
+                    <span class="level-item">September 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">3</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/08/">
+                <span class="level-start">
+                    <span class="level-item">August 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/07/">
+                <span class="level-start">
+                    <span class="level-item">July 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">3</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                Tags
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/autodetectchangesenabled/">
+                        <span class="tag">AutoDetectChangesEnabled</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/il/">
+                        <span class="tag">IL</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/libman/">
+                        <span class="tag">LibMan</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/microsoft/">
+                        <span class="tag">Microsoft</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/visual-studio/">
+                        <span class="tag">Visual Studio</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/action/">
+                        <span class="tag">action</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/asp-net-core/">
+                        <span class="tag">asp-net-core</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/async-await/">
+                        <span class="tag">async-await</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/awaitables/">
+                        <span class="tag">awaitables</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/benefits/">
+                        <span class="tag">benefits</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/blazor/">
+                        <span class="tag">blazor</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/boxing/">
+                        <span class="tag">boxing</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/callback-functions/">
+                        <span class="tag">callback functions</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/compiler/">
+                        <span class="tag">compiler</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/component-parameters/">
+                        <span class="tag">component parameters</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/csharp/">
+                        <span class="tag">csharp</span>
+                        <span class="tag is-grey">11</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/custom/">
+                        <span class="tag">custom</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/customizing-400-error-response/">
+                        <span class="tag">customizing 400 error response</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/dapper/">
+                        <span class="tag">dapper</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/data-binding/">
+                        <span class="tag">data binding</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/debugging/">
+                        <span class="tag">debugging</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/dictionary/">
+                        <span class="tag">dictionary</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/entity-framework/">
+                        <span class="tag">entity framework</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/event-bubbling/">
+                        <span class="tag">event bubbling</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/event-delegation/">
+                        <span class="tag">event delegation</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/expression-trees/">
+                        <span class="tag">expression trees</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/extension-method/">
+                        <span class="tag">extension method</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/filter/">
+                        <span class="tag">filter</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/func/">
+                        <span class="tag">func</span>
+                        <span class="tag is-grey">4</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/heap/">
+                        <span class="tag">heap</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/javascript/">
+                        <span class="tag">javascript</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/libman-json/">
+                        <span class="tag">libman.json</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/linq/">
+                        <span class="tag">linq</span>
+                        <span class="tag is-grey">7</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/list/">
+                        <span class="tag">list</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/model-state-validation/">
+                        <span class="tag">model state validation</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/oftype/">
+                        <span class="tag">oftype</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/one-way-data-binding/">
+                        <span class="tag">one-way data binding</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/performance/">
+                        <span class="tag">performance</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/preventdefault/">
+                        <span class="tag">preventDefault</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/private-methods/">
+                        <span class="tag">private methods</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/refactoring/">
+                        <span class="tag">refactoring</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/row-number/">
+                        <span class="tag">row_number</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/sharplab/">
+                        <span class="tag">sharplab</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/signalr/">
+                        <span class="tag">signalr</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/stack/">
+                        <span class="tag">stack</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/stoppropagation/">
+                        <span class="tag">stopPropagation</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/strategy-design-pattern/">
+                        <span class="tag">strategy design pattern</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/streaming/">
+                        <span class="tag">streaming</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/switch-case/">
+                        <span class="tag">switch case</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/taghelpers/">
+                        <span class="tag">taghelpers</span>
+                        <span class="tag is-grey">2</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/task/">
+                        <span class="tag">task</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/tools/">
+                        <span class="tag">tools</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/two-way-data-binding/">
+                        <span class="tag">two-way data binding</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/unit-testing/">
+                        <span class="tag">unit testing</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+                <div class="control">
+                    <a class="tags has-addons" href="/tags/web-api/">
+                        <span class="tag">web api</span>
+                        <span class="tag is-grey">1</span>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    Coderethinked.com
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2018 - 2019 Karthik Chintala&nbsp;. All rights reserved.
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> & <a href="http://github.com/ppoffice/hexo-theme-icarus">Icarus</a>
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="http://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("en");</script>
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+    
+    
+
+<a id="back-to-top" title="Back to Top" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+    <script src="/js/clipboard.js" defer></script>
+    
+
+    
+    
+
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="Type something...">
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+</html>

@@ -2,20 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://coderethinked.com/admin/config.json</loc>
-    
-    <lastmod>2019-11-14T01:44:54.514Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://coderethinked.com/admin/index.html</loc>
-    
-    <lastmod>2019-11-14T01:26:08.947Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://coderethinked.com/sharing-data-between-vue-js-components/</loc>
     
     <lastmod>2019-11-13T01:18:36.217Z</lastmod>
@@ -65,14 +51,14 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/unit-tests-for-private-methods/</loc>
+    <loc>https://coderethinked.com/visualizing-stack-and-heap-with-sharplab-io/</loc>
     
     <lastmod>2019-08-17T02:24:04.711Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://coderethinked.com/visualizing-stack-and-heap-with-sharplab-io/</loc>
+    <loc>https://coderethinked.com/unit-tests-for-private-methods/</loc>
     
     <lastmod>2019-08-17T02:24:04.711Z</lastmod>
     
@@ -163,14 +149,14 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/don-t-use-func-delegate-on-the-ef-entities/</loc>
+    <loc>https://coderethinked.com/delegates-as-callback-functions-in-csharp/</loc>
     
     <lastmod>2019-08-17T02:24:04.556Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://coderethinked.com/delegates-as-callback-functions-in-csharp/</loc>
+    <loc>https://coderethinked.com/don-t-use-func-delegate-on-the-ef-entities/</loc>
     
     <lastmod>2019-08-17T02:24:04.556Z</lastmod>
     
@@ -184,7 +170,7 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/building-dynamic-linq-queries-using-expression-trees-and-func/</loc>
+    <loc>https://coderethinked.com/asp-net-core-and-benefits/</loc>
     
     <lastmod>2019-08-17T02:24:04.494Z</lastmod>
     
@@ -198,14 +184,14 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/asp-net-core-and-benefits/</loc>
+    <loc>https://coderethinked.com/creating-custom-tag-helpers-in-asp-net-core/</loc>
     
     <lastmod>2019-08-17T02:24:04.494Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://coderethinked.com/creating-custom-tag-helpers-in-asp-net-core/</loc>
+    <loc>https://coderethinked.com/building-dynamic-linq-queries-using-expression-trees-and-func/</loc>
     
     <lastmod>2019-08-17T02:24:04.494Z</lastmod>
     

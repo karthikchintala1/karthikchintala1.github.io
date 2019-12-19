@@ -6,7 +6,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="https://coderethinked.com/"/>
-  <updated>2019-11-13T01:18:36.217Z</updated>
+  <updated>2019-12-19T01:25:06.357Z</updated>
   <id>https://coderethinked.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>3 different ways to access constants in a Vue JS template</title>
+    <link href="https://coderethinked.com/3-different-ways-to-access-constants-in-a-vue-template/"/>
+    <id>https://coderethinked.com/3-different-ways-to-access-constants-in-a-vue-template/</id>
+    <published>2019-12-19T01:25:22.000Z</published>
+    <updated>2019-12-19T01:25:06.357Z</updated>
+    
+    <content type="html"><![CDATA[<p>In this post, I’ll show how to access a constant in the vue <code>&lt;template&gt;</code> tag.</p><p>If we consume the constant directly in the vue template we’ll get an error when compiling the app.</p><a id="more"></a><blockquote><p>[Vue warn]: Property or method “NumberOne” is not defined on the instance but referenced during render. Make sure that this property is reactive, either in the data option, or for class-based components, by initializing the property.</p></blockquote><p>Here’s the example code with the above error.</p><figure class="highlight html hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span><br><span class="line">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"hello"</span>&gt;</span></span><br><span class="line">    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>&#123;&#123; msg &#125;&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span><br><span class="line">    <span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Constant number : &#123;&#123; NumberOne &#125;&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span></span><br><span class="line">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span><br><span class="line"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="hljs-undefined"></span></span><br><span class="line"><span class="hljs-undefined">const NumberOne = 1;</span></span><br><span class="line"><span class="hljs-undefined"></span></span><br><span class="line"><span class="hljs-undefined">export default &#123;</span></span><br><span class="line"><span class="hljs-undefined">  name: 'HelloWorld',</span></span><br><span class="line"><span class="hljs-undefined">  props: &#123;</span></span><br><span class="line"><span class="hljs-undefined">    msg: String</span></span><br><span class="line"><span class="hljs-undefined">  &#125;,</span></span><br><span class="line"><span class="hljs-undefined">&#125;</span></span><br><span class="line"><span class="hljs-undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span><br></pre></td></tr></table></figure><p>The above example may not compile at all because NumberOne is defined but we are not using it anywhere.</p><blockquote><p>error: ‘NumberOne’ is assigned a value but never used</p></blockquote><p>If you are using the constant anywhere in the file, then you shouldn’t see the above error.</p><p>Okay, let’s fix accessing constant in the vue template section.</p><h3 id="Adding-a-reactive-property-in-data-–-Not-the-best"><a href="#Adding-a-reactive-property-in-data-–-Not-the-best" class="headerlink" title="Adding a reactive property in data() – Not the best"></a>Adding a reactive property in data() – Not the best</h3><p>One way to silence this is to add a local property in the data and use the local variable in the template instead of directly accessing the constant.</p><figure class="highlight js hljs"><figcaption><span>ConstantAsReactiveProp.vue</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div <span class="hljs-class"><span class="hljs-keyword">class</span></span>=<span class="hljs-string">"hello"</span>&gt;</span><br><span class="line">    &lt;h1&gt;&#123;&#123; msg &#125;&#125;&lt;<span class="hljs-regexp">/h1&gt;</span></span><br><span class="line"><span class="hljs-regexp">    &lt;h3&gt;Constant number : &#123;&#123; numberOne &#125;&#125;&lt;/</span>h3&gt;</span><br><span class="line">  &lt;<span class="hljs-regexp">/div&gt;</span></span><br><span class="line"><span class="hljs-regexp">&lt;/</span>template&gt;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">data () &#123;</span><br><span class="line">    <span class="hljs-keyword">this</span>.numberOne = NumberOne;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>This solves the problem, but we don’t need to have a reactive variable for a constant. (<a href="https://vuejs.org/v2/guide/reactivity.html#Change-Detection-Caveats" target="_blank" rel="noopener">Vue change detection caveat</a>)</p><p>Under the hood, vue creates getter and setter for <code>numberOne</code>. So, <code>numberOne</code> variable will be reactive.</p><p>For simple use cases like the above example, I think it’s okay to go with this approach. But, I don’t personally recommend.</p><h3 id="Create-private-variables-in-created-hook-–-GOOD"><a href="#Create-private-variables-in-created-hook-–-GOOD" class="headerlink" title="Create private variables in created() hook – GOOD"></a>Create private variables in created() hook – GOOD</h3><p>We’ll have to create a variable in the created hook and utilize the variable in the template.</p><figure class="highlight js hljs"><figcaption><span>ConstantAsPrivateVariableInCreatedHook.vue</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">created () &#123;</span><br><span class="line">    <span class="hljs-keyword">this</span>.NUMBER_ONE = NumberOne;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight html hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Constant number : &#123;&#123; NUMBER_ONE &#125;&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span></span><br></pre></td></tr></table></figure><p>This is pretty simple to do.</p><p>And this doesn’t add the variables to the reactive system because <em>when the <code>created()</code> hook is called Vue has already finished the observation phase</em>.</p><p><strong>Note all Vue API/internal properties start with either $ or _, so as long as your property doesn’t use these two prefixes it will be totally fine.</strong></p><p>If you have very limited usage, I think this is the best way to use constants in the template.</p><h3 id="A-plugin-to-access-constants-–-GOOD"><a href="#A-plugin-to-access-constants-–-GOOD" class="headerlink" title="A plugin to access constants – GOOD"></a>A plugin to access constants – GOOD</h3><p>If you have many constants that should be accessed across the files, it’s better to create a plugin and access these.</p><figure class="highlight js hljs"><figcaption><span>constPlugin.js</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">const</span> Numbers = &#123;</span><br><span class="line">    NumberOne: <span class="hljs-number">1</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Numbers.install = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">Vue</span>) </span>&#123;</span><br><span class="line">    Vue.prototype.$getConst = <span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> Numbers[key];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Numbers;</span><br></pre></td></tr></table></figure><p>In the <code>main.js</code> file, add the following lines to use the plugin across.</p><figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">import</span> constPlugin <span class="hljs-keyword">from</span> <span class="hljs-string">"./components/constPlugin"</span>;</span><br><span class="line">Vue.use(constPlugin);</span><br></pre></td></tr></table></figure><p>and finally in the file(s), we’ll call the function.<br><figure class="highlight html hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Constant number : &#123;&#123; $getConst('NumberOne') &#125;&#125;<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span></span><br></pre></td></tr></table></figure></p><p>This is the best way of having the constants if you wish to use them all over your files.</p><p>If you have many files that use the common constants, it’s better to go with this approach.</p><h3 id="References"><a href="#References" class="headerlink" title="References"></a>References</h3><ul><li><a href="https://github.com/vuejs/vue/issues/1988#issuecomment-163013818" target="_blank" rel="noopener">creating private variables</a></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      The easiest way to use a const in vue template is to add a local variable in the data() but we don&#39;t need that to be a reactive prop. In this post, I&#39;ll explain 3 different ways of accessing a constant in the vue template.
+    
+    </summary>
+    
+      <category term="vuejs" scheme="https://coderethinked.com/categories/vuejs/"/>
+    
+    
+      <category term="vue" scheme="https://coderethinked.com/tags/vue/"/>
+    
+      <category term="constants" scheme="https://coderethinked.com/tags/constants/"/>
+    
+      <category term="private variables" scheme="https://coderethinked.com/tags/private-variables/"/>
+    
+  </entry>
   
   <entry>
     <title>Sharing data between Vue JS components</title>
@@ -144,9 +170,9 @@
       <category term="delegates" scheme="https://coderethinked.com/categories/csharp/delegates/"/>
     
     
-      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
-    
       <category term="func" scheme="https://coderethinked.com/tags/func/"/>
+    
+      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
     
       <category term="action" scheme="https://coderethinked.com/tags/action/"/>
     
@@ -422,13 +448,13 @@
       <category term="linq" scheme="https://coderethinked.com/categories/csharp/linq/"/>
     
     
-      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
-    
       <category term="linq" scheme="https://coderethinked.com/tags/linq/"/>
     
       <category term="expression trees" scheme="https://coderethinked.com/tags/expression-trees/"/>
     
       <category term="func" scheme="https://coderethinked.com/tags/func/"/>
+    
+      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
     
   </entry>
   
@@ -478,11 +504,11 @@
       <category term="performance" scheme="https://coderethinked.com/categories/csharp/performance/"/>
     
     
-      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
-    
       <category term="linq" scheme="https://coderethinked.com/tags/linq/"/>
     
       <category term="func" scheme="https://coderethinked.com/tags/func/"/>
+    
+      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
     
       <category term="performance" scheme="https://coderethinked.com/tags/performance/"/>
     
@@ -510,15 +536,15 @@
       <category term="linq" scheme="https://coderethinked.com/categories/csharp/expression-trees/linq/"/>
     
     
-      <category term="switch case" scheme="https://coderethinked.com/tags/switch-case/"/>
-    
-      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
-    
       <category term="linq" scheme="https://coderethinked.com/tags/linq/"/>
     
       <category term="expression trees" scheme="https://coderethinked.com/tags/expression-trees/"/>
     
       <category term="func" scheme="https://coderethinked.com/tags/func/"/>
+    
+      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
+    
+      <category term="switch case" scheme="https://coderethinked.com/tags/switch-case/"/>
     
   </entry>
   
@@ -546,32 +572,6 @@
       <category term="taghelpers" scheme="https://coderethinked.com/tags/taghelpers/"/>
     
       <category term="custom" scheme="https://coderethinked.com/tags/custom/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Shortest word in a string with LINQ</title>
-    <link href="https://coderethinked.com/shortest-word-in-a-string-with-linq/"/>
-    <id>https://coderethinked.com/shortest-word-in-a-string-with-linq/</id>
-    <published>2018-09-28T01:07:48.000Z</published>
-    <updated>2019-08-17T02:24:04.579Z</updated>
-    
-    <content type="html"><![CDATA[<p>In this post, we’ll try to find the shortest word in a string using LINQ.</p><a id="more"></a><h3 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h3><p>Given a string of words, return the length of the shortest word in the string.</p><p>Forget the edge cases of handling (empty or null).</p><blockquote><p>Ex: “The shortest string” =&gt; should output 3 for “The”</p></blockquote><h3 id="Initial-thoughts"><a href="#Initial-thoughts" class="headerlink" title="Initial thoughts"></a>Initial thoughts</h3><p>So there will be a string which contains words. First, we’ll split that string with empty space so that we’ll get all the words in a string.</p><p>Now, we can sort the list of strings by length so that our shortest word will be in the first place and then we can perform a <code>FirstOrDefault</code> on it.<br><ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1873760810392013" data-ad-slot="4571563695"></ins><script>     (adsbygoogle = window.adsbygoogle || []).push({});</script><br><figure class="highlight csharp hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">ShortestWord</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> s</span>)</span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">​    <span class="hljs-keyword">return</span> s.Split(<span class="hljs-string">' '</span>).OrderBy(x =&gt; x.Length).FirstOrDefault().Length;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>or we can do an orderby and then do a select the length and return the first item.<br><figure class="highlight csharp hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">return</span> s.Split(<span class="hljs-string">' '</span>).OrderBy(i =&gt; i.Length).Select(i=&gt;i.Length).First();</span><br></pre></td></tr></table></figure></p><p>There can be many solutions like this.</p><p>Okay, we’ll see what’s the best or the clever solution</p><h3 id="Best-Solution"><a href="#Best-Solution" class="headerlink" title="Best Solution"></a>Best Solution</h3><p>We have the <code>.Min</code> extension method in LINQ. That should be sufficient to return the minimum length of the word.</p><figure class="highlight csharp hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">ShortestWord</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> s</span>)</span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">​    <span class="hljs-keyword">return</span> s.Split(<span class="hljs-string">' '</span>).Min(x =&gt; x.Length);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1873760810392013" data-ad-slot="4571563695"></ins><script>     (adsbygoogle = window.adsbygoogle || []).push({});</script><p>That’s it! That will return the minimum length of a word in a string.</p>]]></content>
-    
-    <summary type="html">
-    
-      In this post we will see how to find the shortest word in a string using LINQ with C#.
-    
-    </summary>
-    
-      <category term="csharp" scheme="https://coderethinked.com/categories/csharp/"/>
-    
-      <category term="linq" scheme="https://coderethinked.com/categories/csharp/linq/"/>
-    
-    
-      <category term="csharp" scheme="https://coderethinked.com/tags/csharp/"/>
-    
-      <category term="linq" scheme="https://coderethinked.com/tags/linq/"/>
     
   </entry>
   

@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://coderethinked.com/3-different-ways-to-access-constants-in-a-vue-template/</loc>
+    
+    <lastmod>2019-12-19T01:25:06.357Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://coderethinked.com/sharing-data-between-vue-js-components/</loc>
     
     <lastmod>2019-11-13T01:18:36.217Z</lastmod>
@@ -30,13 +37,6 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/about/index.html</loc>
-    
-    <lastmod>2019-08-17T02:24:04.727Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://coderethinked.com/why-func-delegate-is-not-translated-to-sql/</loc>
     
     <lastmod>2019-08-17T02:24:04.727Z</lastmod>
@@ -51,14 +51,21 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/unit-tests-for-private-methods/</loc>
+    <loc>https://coderethinked.com/about/index.html</loc>
+    
+    <lastmod>2019-08-17T02:24:04.727Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://coderethinked.com/visualizing-stack-and-heap-with-sharplab-io/</loc>
     
     <lastmod>2019-08-17T02:24:04.711Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://coderethinked.com/visualizing-stack-and-heap-with-sharplab-io/</loc>
+    <loc>https://coderethinked.com/unit-tests-for-private-methods/</loc>
     
     <lastmod>2019-08-17T02:24:04.711Z</lastmod>
     
@@ -149,14 +156,14 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/delegates-as-callback-functions-in-csharp/</loc>
+    <loc>https://coderethinked.com/don-t-use-func-delegate-on-the-ef-entities/</loc>
     
     <lastmod>2019-08-17T02:24:04.556Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://coderethinked.com/don-t-use-func-delegate-on-the-ef-entities/</loc>
+    <loc>https://coderethinked.com/delegates-as-callback-functions-in-csharp/</loc>
     
     <lastmod>2019-08-17T02:24:04.556Z</lastmod>
     
@@ -170,14 +177,14 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/customizing-automatic-http-400-error-response-in-asp-net-core-web-apis/</loc>
+    <loc>https://coderethinked.com/How-c-compiler-looks-at-switch-case-statements/</loc>
     
     <lastmod>2019-08-17T02:24:04.494Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://coderethinked.com/asp-net-core-and-benefits/</loc>
+    <loc>https://coderethinked.com/customizing-automatic-http-400-error-response-in-asp-net-core-web-apis/</loc>
     
     <lastmod>2019-08-17T02:24:04.494Z</lastmod>
     
@@ -198,14 +205,14 @@
   </url>
   
   <url>
-    <loc>https://coderethinked.com/awaiting-a-method-vs-awaiting-a-task/</loc>
+    <loc>https://coderethinked.com/asp-net-core-and-benefits/</loc>
     
     <lastmod>2019-08-17T02:24:04.494Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://coderethinked.com/How-c-compiler-looks-at-switch-case-statements/</loc>
+    <loc>https://coderethinked.com/awaiting-a-method-vs-awaiting-a-task/</loc>
     
     <lastmod>2019-08-17T02:24:04.494Z</lastmod>
     
